@@ -1,6 +1,6 @@
-let s;
-  
-export default class LoadBalancer {
+
+export const label = 'Round-robin';
+export default class RoundRobin {
   // import vite.config;
   // Очень важное примечание к этому заданию: все полезные нагрузки запросов должны быть заменены числовым значением строки. В противном случае задание будет считаться невыполненным.
 
@@ -14,22 +14,30 @@ export default class LoadBalancer {
     //   activeProgress: 0.25 // Progreso de 0 a 1 (0 si está libre)
     // }
     // Los datos son de solo lectura y se actualizan durante la simulación.
-    this.servers = Object.freeze([...servers]);
+    this.servers = servers;
+    this.next=0;
+    this.c=0;
   }
   
-  s=-1;
-  async onRequestArrival(request, sendToServer) {
-    s++;
-    if (s=5){
-      s=0;
-    }
+  
+   onRequestArrival(request, sendToServer) {
     // Ejemplo de la petición que llega:
     // {
     //   id: "request-17",
     //   payload: "08319462", // Datos que envía el cliente
     //   work: 4              // Unidades de trabajo necesarias
     // }
-    const server = this.servers[s];
+    const server = this.servers[this.next];
+    if (this.c<server.power){
+      this.next=this.next;
+      this.c++;
+    }
+    else{
+      this.next=(this.next + 1 ) % this.servers.length;
+      this.c=0;
+    }
+    
+    
 
     // Envía la petición al servidor y devuelve su respuesta al cliente.
     return sendToServer(server.id);
